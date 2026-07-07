@@ -1,0 +1,21 @@
+# OpenDKIM configuration template for Omoikane-Mail
+# Replace {{MAIL_DOMAIN}} with the real domain before use.
+
+Syslog          yes
+SyslogSuccess   yes
+LogWhy          yes
+
+Canonicalization  relaxed/simple
+
+Domain          {{MAIL_DOMAIN}}
+Selector        mail
+KeyFile         /etc/opendkim/keys/{{MAIL_DOMAIN}}/mail.private
+
+# Listen on localhost port 8891 (Postfix milter)
+Socket          inet:8891@localhost
+
+PidFile         /run/opendkim/opendkim.pid
+OversignHeaders From
+TrustAnchorFile /usr/share/dns/root.key
+UserID          opendkim
+UMask           007
