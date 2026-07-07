@@ -166,7 +166,7 @@ postconf -e "smtpd_sasl_path = private/auth"
 postconf -e "smtpd_sasl_auth_enable = yes"
 postconf -e "smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination"
 
-# Milter protocol settings (sockets are set later in step 8 once both
+# Milter protocol settings (sockets are set after step 8 once both
 # OpenDKIM and Rspamd are configured)
 postconf -e "milter_default_action = accept"
 postconf -e "milter_protocol = 6"
@@ -292,9 +292,6 @@ cat > /etc/opendkim/SigningTable << SIGNING_EOF
 *@${MAIL_DOMAIN} mail._domainkey.${MAIL_DOMAIN}
 SIGNING_EOF
 
-postconf -e "smtpd_milters = inet:localhost:8891,inet:localhost:11332"
-postconf -e "non_smtpd_milters = inet:localhost:8891,inet:localhost:11332"
-
 success "OpenDKIM configured."
 echo ""
 echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════════╗${NC}"
@@ -332,6 +329,10 @@ RSPAMD_LOG_EOF
 
 # DKIM signing via rspamd (optional – complements OpenDKIM)
 # Disabled here to avoid double-signing; OpenDKIM handles it above.
+
+# Set milter sockets now that both OpenDKIM (8891) and Rspamd (11332) are ready
+postconf -e "smtpd_milters = inet:localhost:8891,inet:localhost:11332"
+postconf -e "non_smtpd_milters = inet:localhost:8891,inet:localhost:11332"
 
 success "Rspamd configured."
 

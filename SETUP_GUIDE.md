@@ -61,12 +61,12 @@ Log into your domain registrar / DNS panel for `omoikane.icu` and create the fol
 
 ### Required DNS records
 
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| `A` | `mail` | `203.0.113.10` | 300 |
-| `MX` | `@` | `mail.omoikane.icu` | 300 |
-| `TXT` | `@` | `v=spf1 mx a:mail.omoikane.icu ~all` | 300 |
-| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:admin@omoikane.icu` | 300 |
+| Type | Name | Value | Priority | TTL |
+|------|------|-------|----------|-----|
+| `A` | `mail` | `203.0.113.10` | – | 300 |
+| `MX` | `@` | `mail.omoikane.icu` | `10` | 300 |
+| `TXT` | `@` | `v=spf1 mx a:mail.omoikane.icu ~all` | – | 300 |
+| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:admin@omoikane.icu` | – | 300 |
 
 ### PTR (Reverse DNS) record
 
@@ -278,6 +278,10 @@ submission inet n       -       y       -       -       smtpd
   -o smtpd_tls_security_level=encrypt
   -o smtpd_sasl_auth_enable=yes
   -o smtpd_tls_auth_only=yes
+  -o smtpd_reject_unlisted_recipient=no
+  -o smtpd_client_restrictions=$mua_client_restrictions
+  -o smtpd_helo_restrictions=$mua_helo_restrictions
+  -o smtpd_sender_restrictions=$mua_sender_restrictions
   -o smtpd_recipient_restrictions=permit_sasl_authenticated,reject
   -o milter_macro_daemon_name=ORIGINATING
 
@@ -285,6 +289,10 @@ smtps     inet  n       -       y       -       -       smtpd
   -o syslog_name=postfix/smtps
   -o smtpd_tls_wrappermode=yes
   -o smtpd_sasl_auth_enable=yes
+  -o smtpd_reject_unlisted_recipient=no
+  -o smtpd_client_restrictions=$mua_client_restrictions
+  -o smtpd_helo_restrictions=$mua_helo_restrictions
+  -o smtpd_sender_restrictions=$mua_sender_restrictions
   -o smtpd_recipient_restrictions=permit_sasl_authenticated,reject
   -o milter_macro_daemon_name=ORIGINATING
 ```
@@ -792,11 +800,11 @@ fail2ban-client set postfix unbanip 203.0.113.1
 
 ## Summary of All DNS Records
 
-| Type | Name | Value |
-|------|------|-------|
-| `A` | `mail` | `<server IPv4>` |
-| `MX` | `@` | `mail.omoikane.icu` (priority 10) |
-| `TXT` | `@` | `v=spf1 mx a:mail.omoikane.icu ~all` |
-| `TXT` | `mail._domainkey` | `v=DKIM1; h=sha256; k=rsa; p=<public key>` |
-| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:admin@omoikane.icu` |
-| PTR | `<server IP>` | `mail.omoikane.icu` (set at VPS provider) |
+| Type | Name | Value | Priority |
+|------|------|-------|----------|
+| `A` | `mail` | `<server IPv4>` | – |
+| `MX` | `@` | `mail.omoikane.icu` | `10` |
+| `TXT` | `@` | `v=spf1 mx a:mail.omoikane.icu ~all` | – |
+| `TXT` | `mail._domainkey` | `v=DKIM1; h=sha256; k=rsa; p=<public key>` | – |
+| `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:admin@omoikane.icu` | – |
+| PTR | `<server IP>` | `mail.omoikane.icu` (set at VPS provider) | – |
