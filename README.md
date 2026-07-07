@@ -62,7 +62,6 @@ Omoikane-Mail/
     │   └── master.cf.template
     ├── dovecot/
     │   ├── dovecot.conf.template
-    │   └── 10-ssl.conf.template
     ├── opendkim/
     │   └── opendkim.conf.template
     └── rspamd/
@@ -73,4 +72,4 @@ Omoikane-Mail/
 
 ## Licence
 
-MIT – see [LICENSE](LICENSE) if present.
+MIT – see [LICENSE](LICENSE).

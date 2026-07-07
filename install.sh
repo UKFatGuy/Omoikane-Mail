@@ -166,18 +166,14 @@ postconf -e "smtpd_sasl_path = private/auth"
 postconf -e "smtpd_sasl_auth_enable = yes"
 postconf -e "smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination"
 
-# Milter for DKIM
+# Milter protocol settings (sockets are set later in step 8 once both
+# OpenDKIM and Rspamd are configured)
 postconf -e "milter_default_action = accept"
 postconf -e "milter_protocol = 6"
-postconf -e "smtpd_milters = inet:localhost:8891"
-postconf -e "non_smtpd_milters = inet:localhost:8891"
-
-# Rspamd milter
-postconf -e "smtpd_milters = inet:localhost:11332"
-postconf -e "non_smtpd_milters = inet:localhost:11332"
 
 # master.cf – enable submission (port 587) and smtps (port 465)
-if ! grep -q "^submission" /etc/postfix/master.cf; then
+# Use postconf -M to avoid false negatives from commented-out lines
+if ! postconf -M 2>/dev/null | grep -q "^submission/inet"; then
 cat >> /etc/postfix/master.cf << 'MASTER_EOF'
 submission inet n       -       y       -       -       smtpd
   -o syslog_name=postfix/submission
