@@ -1,0 +1,46 @@
+# Postfix main.cf template for Omoikane-Mail
+# Replace {{MAIL_HOSTNAME}} and {{MAIL_DOMAIN}} with real values,
+# or use install.sh which fills these in automatically via postconf -e.
+
+# ── Identity ──────────────────────────────────────────────────────────────────
+myhostname = {{MAIL_HOSTNAME}}
+mydomain   = {{MAIL_DOMAIN}}
+myorigin   = $mydomain
+
+# ── Network ───────────────────────────────────────────────────────────────────
+inet_interfaces  = all
+inet_protocols   = ipv4
+mydestination    = $myhostname, localhost.$mydomain, localhost, $mydomain
+mynetworks       = 127.0.0.0/8
+
+# ── Mailbox ───────────────────────────────────────────────────────────────────
+home_mailbox         = Maildir/
+mailbox_size_limit   = 0
+recipient_delimiter  = +
+
+# ── TLS incoming (smtpd) ──────────────────────────────────────────────────────
+smtpd_tls_cert_file  = /etc/letsencrypt/live/{{MAIL_HOSTNAME}}/fullchain.pem
+smtpd_tls_key_file   = /etc/letsencrypt/live/{{MAIL_HOSTNAME}}/privkey.pem
+smtpd_tls_security_level = may
+smtpd_tls_auth_only  = yes
+smtpd_tls_protocols  = !SSLv2,!SSLv3,!TLSv1,!TLSv1.1
+smtpd_tls_ciphers    = high
+smtpd_tls_loglevel   = 1
+
+# ── TLS outgoing (smtp) ───────────────────────────────────────────────────────
+smtp_tls_security_level = may
+smtp_tls_protocols      = !SSLv2,!SSLv3,!TLSv1,!TLSv1.1
+smtp_tls_ciphers        = high
+smtp_tls_loglevel       = 1
+
+# ── SASL (Dovecot) ────────────────────────────────────────────────────────────
+smtpd_sasl_type          = dovecot
+smtpd_sasl_path          = private/auth
+smtpd_sasl_auth_enable   = yes
+smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination
+
+# ── Milters (OpenDKIM + Rspamd) ───────────────────────────────────────────────
+milter_default_action = accept
+milter_protocol       = 6
+smtpd_milters         = inet:localhost:8891,inet:localhost:11332
+non_smtpd_milters     = inet:localhost:8891,inet:localhost:11332

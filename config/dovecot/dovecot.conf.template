@@ -1,0 +1,51 @@
+# Dovecot configuration template for Omoikane-Mail
+# Replace {{MAIL_HOSTNAME}} with the real hostname before use,
+# or use install.sh which writes this file directly.
+
+protocols = imap pop3 lmtp
+mail_location = maildir:~/Maildir
+
+namespace inbox {
+  inbox = yes
+}
+
+# ── Authentication ────────────────────────────────────────────────────────────
+service auth {
+  unix_listener /var/spool/postfix/private/auth {
+    mode = 0660
+    user = postfix
+    group = postfix
+  }
+}
+
+auth_mechanisms = plain login
+
+passdb {
+  driver = pam
+}
+
+userdb {
+  driver = passwd
+}
+
+# ── TLS ───────────────────────────────────────────────────────────────────────
+ssl = required
+ssl_cert = </etc/letsencrypt/live/{{MAIL_HOSTNAME}}/fullchain.pem
+ssl_key  = </etc/letsencrypt/live/{{MAIL_HOSTNAME}}/privkey.pem
+ssl_min_protocol  = TLSv1.2
+ssl_cipher_list   = ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384
+ssl_prefer_server_ciphers = yes
+
+# ── LMTP delivery socket (Postfix integration) ────────────────────────────────
+service lmtp {
+  unix_listener /var/spool/postfix/private/dovecot-lmtp {
+    mode = 0600
+    user = postfix
+    group = postfix
+  }
+}
+
+# ── Protocol settings ─────────────────────────────────────────────────────────
+protocol imap {
+  mail_max_userip_connections = 20
+}
